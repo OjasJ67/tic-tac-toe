@@ -6,489 +6,180 @@
 <title>Tic Tac Toe</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
 <style>
-  /* ── RESET & BASE ─────────────────────────────────────────── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --x:   #FF4757;
-    --o:   #1E90FF;
-    --bg:  #0D0D14;
-    --s1:  #16161F;
-    --s2:  #1E1E2E;
-    --s3:  #2A2A3E;
-    --border: rgba(255,255,255,0.07);
-    --gold: #FFD700;
-    --txt: #E8E8F0;
-    --sub: #7878A0;
-    --radius: 18px;
-    --glow-x: 0 0 32px rgba(255,71,87,0.45);
-    --glow-o: 0 0 32px rgba(30,144,255,0.45);
+    --x: #FF4757; --o: #1E90FF; --bg: #0D0D14; --s1: #16161F; --s2: #1E1E2E; --s3: #2A2A3E;
+    --border: rgba(255,255,255,0.07); --gold: #FFD700; --txt: #E8E8F0; --sub: #7878A0;
+    --radius: 18px; --glow-x: 0 0 32px rgba(255,71,87,0.45); --glow-o: 0 0 32px rgba(30,144,255,0.45);
   }
 
-  html, body {
-    height: 100%;
-    background: var(--bg);
-    color: var(--txt);
-    font-family: 'DM Sans', sans-serif;
-    overflow-x: hidden;
-  }
+  html, body { height: 100%; background: var(--bg); color: var(--txt); font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
 
-  /* Subtle animated grid background */
   body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-    background-size: 48px 48px;
-    pointer-events: none;
-    z-index: 0;
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 48px 48px; pointer-events: none; z-index: 0;
   }
 
-  /* ── SCREEN SYSTEM ────────────────────────────────────────── */
   .screen {
-    display: none;
-    position: relative;
-    z-index: 1;
-    min-height: 100vh;
-    padding: 24px 16px;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: none; position: relative; z-index: 1; min-height: 100vh;
+    padding: 24px 16px; flex-direction: column; align-items: center; justify-content: center;
     animation: fadeUp 0.4s ease both;
   }
   .screen.active { display: flex; }
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(22px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
 
-  /* ── LOGO ─────────────────────────────────────────────────── */
   .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(52px, 10vw, 80px);
-    letter-spacing: 6px;
-    line-height: 1;
+    font-family: 'Bebas Neue', sans-serif; font-size: clamp(52px,10vw,80px);
+    letter-spacing: 6px; line-height: 1;
     background: linear-gradient(135deg, var(--x) 0%, #FF8C00 40%, var(--o) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-align: center;
-    margin-bottom: 6px;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    text-align: center; margin-bottom: 6px;
   }
-  .tagline {
-    color: var(--sub);
-    font-size: 13px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    text-align: center;
-    margin-bottom: 40px;
-  }
+  .tagline { color: var(--sub); font-size: 13px; letter-spacing: 3px; text-transform: uppercase; text-align: center; margin-bottom: 40px; }
 
-  /* ── CARD ─────────────────────────────────────────────────── */
   .card {
-    background: var(--s1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px;
-    width: 100%;
-    max-width: 420px;
+    background: var(--s1); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px; width: 100%; max-width: 420px;
   }
   .card + .card { margin-top: 16px; }
 
-  /* ── BUTTONS ──────────────────────────────────────────────── */
   .btn {
     display: flex; align-items: center; justify-content: center; gap: 10px;
-    width: 100%;
-    padding: 16px 24px;
-    border: none; border-radius: 12px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 16px; font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+    width: 100%; padding: 16px 24px; border: none; border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700;
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
     position: relative; overflow: hidden;
   }
   .btn:active { transform: scale(0.97); }
-  .btn::after {
-    content: '';
-    position: absolute; inset: 0;
-    background: rgba(255,255,255,0.08);
-    opacity: 0; transition: opacity 0.2s;
-  }
+  .btn::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,0.08); opacity:0; transition:opacity 0.2s; }
   .btn:hover::after { opacity: 1; }
-
-  .btn-primary {
-    background: linear-gradient(135deg, var(--x), #FF8C00);
-    color: #fff;
-    box-shadow: 0 4px 24px rgba(255,71,87,0.35);
-  }
-  .btn-primary:hover { box-shadow: 0 6px 32px rgba(255,71,87,0.55); }
-
-  .btn-secondary {
-    background: linear-gradient(135deg, var(--o), #00BFFF);
-    color: #fff;
-    box-shadow: 0 4px 24px rgba(30,144,255,0.3);
-  }
-  .btn-secondary:hover { box-shadow: 0 6px 32px rgba(30,144,255,0.5); }
-
-  .btn-ghost {
-    background: var(--s2);
-    border: 1px solid var(--border);
-    color: var(--sub);
-    font-size: 14px;
-  }
-  .btn-ghost:hover { color: var(--txt); border-color: rgba(255,255,255,0.15); }
-
+  .btn-primary  { background: linear-gradient(135deg,var(--x),#FF8C00); color:#fff; box-shadow:0 4px 24px rgba(255,71,87,0.35); }
+  .btn-secondary{ background: linear-gradient(135deg,var(--o),#00BFFF); color:#fff; box-shadow:0 4px 24px rgba(30,144,255,0.3); }
+  .btn-ghost    { background: var(--s2); border:1px solid var(--border); color:var(--sub); font-size:14px; }
+  .btn-ghost:hover { color:var(--txt); border-color:rgba(255,255,255,0.15); }
   .btn + .btn { margin-top: 10px; }
   .btn-sm { padding: 10px 18px; font-size: 14px; width: auto; border-radius: 9px; }
 
-  /* ── INPUTS ───────────────────────────────────────────────── */
   .field { margin-bottom: 16px; }
-  .field label {
-    display: block;
-    font-size: 11px; font-weight: 700; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--sub);
-    margin-bottom: 8px;
-  }
+  .field label { display:block; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--sub); margin-bottom:8px; }
   .field input {
-    width: 100%; padding: 13px 16px;
-    background: var(--s2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--txt); font-family: 'DM Sans', sans-serif; font-size: 15px;
-    outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    width:100%; padding:13px 16px; background:var(--s2); border:1px solid var(--border); border-radius:10px;
+    color:var(--txt); font-family:'DM Sans',sans-serif; font-size:15px; outline:none; transition:border-color 0.2s,box-shadow 0.2s;
   }
-  .field input:focus {
-    border-color: var(--x);
-    box-shadow: 0 0 0 3px rgba(255,71,87,0.15);
-  }
-  .field input.p2:focus {
-    border-color: var(--o);
-    box-shadow: 0 0 0 3px rgba(30,144,255,0.15);
-  }
+  .field input:focus { border-color:var(--x); box-shadow:0 0 0 3px rgba(255,71,87,0.15); }
+  .field input.p2:focus { border-color:var(--o); box-shadow:0 0 0 3px rgba(30,144,255,0.15); }
 
-  .section-title {
-    font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
-    text-transform: uppercase; color: var(--sub);
-    margin-bottom: 14px;
-  }
+  .section-title { font-size:11px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--sub); margin-bottom:14px; }
+  .screen-title { font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:3px; margin-bottom:4px; text-align:center; }
+  .screen-sub { color:var(--sub); font-size:13px; text-align:center; margin-bottom:20px; }
 
-  /* ── HOME SCREEN ──────────────────────────────────────────── */
-  #screen-home .card-mode {
-    background: var(--s1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 22px;
-    width: 100%; max-width: 420px;
-  }
+  /* GAME SCREEN */
+  #screen-game { gap:0; padding-top:16px; }
 
-  /* ── GAME SCREEN ──────────────────────────────────────────── */
-  #screen-game {
-    gap: 0;
-    padding-top: 16px;
-  }
-
-  /* Score bar */
-  .scorebar {
-    display: flex; align-items: center; justify-content: space-between;
-    width: 100%; max-width: 460px;
-    margin-bottom: 18px;
-    gap: 12px;
-  }
+  .scorebar { display:flex; align-items:center; justify-content:space-between; width:100%; max-width:460px; margin-bottom:18px; gap:12px; }
   .player-score {
-    flex: 1;
-    background: var(--s1);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 16px;
-    text-align: center;
-    transition: border-color 0.3s, box-shadow 0.3s;
-    position: relative; overflow: hidden;
+    flex:1; background:var(--s1); border:1px solid var(--border); border-radius:14px;
+    padding:14px 16px; text-align:center; transition:border-color 0.3s,box-shadow 0.3s;
   }
-  .player-score.active-x { border-color: var(--x); box-shadow: var(--glow-x); }
-  .player-score.active-o { border-color: var(--o); box-shadow: var(--glow-o); }
-  .player-score .sym {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px; line-height: 1;
-  }
-  .player-score.x-side .sym { color: var(--x); }
-  .player-score.o-side .sym { color: var(--o); }
-  .player-score .pname {
-    font-size: 12px; font-weight: 700; color: var(--sub);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    margin-top: 2px; max-width: 100%;
-  }
-  .player-score .pts {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 36px; line-height: 1; margin-top: 4px;
-  }
-  .player-score.x-side .pts { color: var(--x); }
-  .player-score.o-side .pts { color: var(--o); }
+  .player-score.active-x { border-color:var(--x); box-shadow:var(--glow-x); }
+  .player-score.active-o { border-color:var(--o); box-shadow:var(--glow-o); }
+  .player-score .sym { font-family:'Bebas Neue',sans-serif; font-size:28px; line-height:1; }
+  .player-score.x-side .sym { color:var(--x); }
+  .player-score.o-side .sym { color:var(--o); }
+  .player-score .pname { font-size:12px; font-weight:700; color:var(--sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+  .player-score .pts { font-family:'Bebas Neue',sans-serif; font-size:36px; line-height:1; margin-top:4px; }
+  .player-score.x-side .pts { color:var(--x); }
+  .player-score.o-side .pts { color:var(--o); }
+  .vs-divider { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--sub); letter-spacing:2px; }
 
-  .vs-divider {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px; color: var(--sub); letter-spacing: 2px;
-  }
-
-  /* Turn indicator */
   .turn-bar {
-    width: 100%; max-width: 460px;
-    background: var(--s1); border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 18px;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    font-size: 14px; font-weight: 700; color: var(--sub);
-    margin-bottom: 18px;
-    transition: border-color 0.3s;
+    width:100%; max-width:460px; background:var(--s1); border:1px solid var(--border);
+    border-radius:10px; padding:10px 18px; display:flex; align-items:center; justify-content:center; gap:8px;
+    font-size:14px; font-weight:700; color:var(--sub); margin-bottom:18px; transition:border-color 0.3s;
   }
-  .turn-bar .turn-name { color: var(--txt); }
-  .turn-bar .turn-sym { font-family: 'Bebas Neue', sans-serif; font-size: 18px; }
-  .turn-bar.tx { border-color: rgba(255,71,87,0.4); }
-  .turn-bar.to { border-color: rgba(30,144,255,0.4); }
+  .turn-bar .turn-sym { font-family:'Bebas Neue',sans-serif; font-size:18px; }
+  .turn-bar.tx { border-color:rgba(255,71,87,0.4); }
+  .turn-bar.to { border-color:rgba(30,144,255,0.4); }
 
-  /* Board */
-  .board-wrap {
-    width: 100%; max-width: 460px;
-    position: relative;
-  }
-  .board {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    padding: 10px;
-    background: var(--s1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-  }
+  .board-wrap { width:100%; max-width:460px; position:relative; }
+  .board { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:10px; background:var(--s1); border:1px solid var(--border); border-radius:var(--radius); }
   .cell {
-    aspect-ratio: 1;
-    background: var(--s2);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(44px, 10vw, 68px);
-    line-height: 1;
-    transition: background 0.15s, border-color 0.15s, transform 0.15s, box-shadow 0.2s;
-    user-select: none;
-    position: relative; overflow: hidden;
+    aspect-ratio:1; background:var(--s2); border:1px solid var(--border); border-radius:14px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    font-family:'Bebas Neue',sans-serif; font-size:clamp(44px,10vw,68px); line-height:1;
+    transition:background 0.15s,border-color 0.15s,transform 0.15s,box-shadow 0.2s; user-select:none;
   }
-  .cell:hover:not(.taken) {
-    background: var(--s3);
-    border-color: rgba(255,255,255,0.15);
-    transform: scale(1.03);
-  }
-  .cell.taken { cursor: default; }
-  .cell.x {
-    color: var(--x);
-    border-color: rgba(255,71,87,0.35);
-    animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1) both;
-  }
-  .cell.o {
-    color: var(--o);
-    border-color: rgba(30,144,255,0.35);
-    animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1) both;
-  }
-  .cell.win-x {
-    background: rgba(255,71,87,0.18);
-    border-color: var(--x);
-    box-shadow: var(--glow-x);
-    animation: winPulse 0.6s ease both;
-  }
-  .cell.win-o {
-    background: rgba(30,144,255,0.18);
-    border-color: var(--o);
-    box-shadow: var(--glow-o);
-    animation: winPulse 0.6s ease both;
-  }
+  .cell:hover:not(.taken) { background:var(--s3); border-color:rgba(255,255,255,0.15); transform:scale(1.03); }
+  .cell.taken { cursor:default; }
+  .cell.x { color:var(--x); border-color:rgba(255,71,87,0.35); animation:popIn 0.25s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .cell.o { color:var(--o); border-color:rgba(30,144,255,0.35); animation:popIn 0.25s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .cell.win-x { background:rgba(255,71,87,0.18); border-color:var(--x); box-shadow:var(--glow-x); animation:winPulse 0.6s ease both; }
+  .cell.win-o { background:rgba(30,144,255,0.18); border-color:var(--o); box-shadow:var(--glow-o); animation:winPulse 0.6s ease both; }
+  @keyframes popIn { 0%{transform:scale(0.4) rotate(-15deg);opacity:0;} 100%{transform:scale(1) rotate(0);opacity:1;} }
+  @keyframes winPulse { 0%{transform:scale(1);} 40%{transform:scale(1.1);} 100%{transform:scale(1);} }
 
-  @keyframes popIn {
-    0%   { transform: scale(0.4) rotate(-15deg); opacity: 0; }
-    100% { transform: scale(1)   rotate(0deg);   opacity: 1; }
-  }
-  @keyframes winPulse {
-    0%   { transform: scale(1); }
-    40%  { transform: scale(1.1); }
-    100% { transform: scale(1); }
-  }
-
-  /* Online waiting overlay */
   .online-overlay {
-    position: absolute; inset: 0;
-    background: rgba(13,13,20,0.88);
-    border-radius: var(--radius);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 14px; z-index: 10;
-    backdrop-filter: blur(4px);
+    position:absolute; inset:0; background:rgba(13,13,20,0.88); border-radius:var(--radius);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:14px; z-index:10; backdrop-filter:blur(4px);
   }
-  .online-overlay.hidden { display: none; }
-  .spinner {
-    width: 42px; height: 42px;
-    border: 3px solid var(--s3);
-    border-top-color: var(--x);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .online-overlay p { font-size: 14px; color: var(--sub); font-weight: 700; text-align: center; }
-  .room-code-display {
-    background: var(--s2); border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 20px;
-    font-family: 'Bebas Neue', sans-serif; font-size: 28px;
-    letter-spacing: 6px; color: var(--gold);
-  }
+  .online-overlay.hidden { display:none; }
+  .spinner { width:42px; height:42px; border:3px solid var(--s3); border-top-color:var(--x); border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg);} }
+  .online-overlay p { font-size:14px; color:var(--sub); font-weight:700; text-align:center; }
+  .room-code-display { background:var(--s2); border:1px solid var(--border); border-radius:10px; padding:10px 20px; font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:6px; color:var(--gold); }
 
-  /* Game buttons */
-  .game-actions {
-    display: flex; gap: 10px;
-    width: 100%; max-width: 460px;
-    margin-top: 14px;
-  }
+  .game-actions { display:flex; gap:10px; width:100%; max-width:460px; margin-top:14px; }
 
-  /* ── RESULT OVERLAY ───────────────────────────────────────── */
+  /* RESULT OVERLAY */
   #result-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.75);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 100;
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.35s;
-    backdrop-filter: blur(6px);
+    position:fixed; inset:0; background:rgba(0,0,0,0.75); display:flex; align-items:center; justify-content:center;
+    z-index:100; opacity:0; pointer-events:none; transition:opacity 0.35s; backdrop-filter:blur(6px);
   }
-  #result-overlay.show { opacity: 1; pointer-events: all; }
-  .result-card {
-    background: var(--s1);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 36px 32px;
-    text-align: center;
-    width: 90%; max-width: 360px;
-    animation: fadeUp 0.35s ease both;
-  }
-  .result-emoji { font-size: 56px; margin-bottom: 10px; }
-  .result-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 42px; letter-spacing: 3px;
-    line-height: 1; margin-bottom: 8px;
-  }
-  .result-title.x-wins { color: var(--x); }
-  .result-title.o-wins { color: var(--o); }
-  .result-title.draw   { color: var(--gold); }
-  .result-sub { color: var(--sub); font-size: 15px; margin-bottom: 24px; }
-  .result-btns { display: flex; gap: 10px; }
+  #result-overlay.show { opacity:1; pointer-events:all; }
+  .result-card { background:var(--s1); border:1px solid var(--border); border-radius:24px; padding:36px 32px; text-align:center; width:90%; max-width:360px; animation:fadeUp 0.35s ease both; }
+  .result-emoji { font-size:56px; margin-bottom:10px; }
+  .result-title { font-family:'Bebas Neue',sans-serif; font-size:42px; letter-spacing:3px; line-height:1; margin-bottom:8px; }
+  .result-title.x-wins { color:var(--x); }
+  .result-title.o-wins { color:var(--o); }
+  .result-title.draw   { color:var(--gold); }
+  .result-sub { color:var(--sub); font-size:15px; margin-bottom:24px; }
+  .result-btns { display:flex; gap:10px; }
 
-  /* ── HISTORY SCREEN ───────────────────────────────────────── */
-  #screen-history { gap: 16px; padding-bottom: 40px; }
-  .history-list {
-    width: 100%; max-width: 460px;
-    display: flex; flex-direction: column; gap: 8px;
-  }
-  .history-row {
-    background: var(--s1);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 18px;
-    display: flex; align-items: center; justify-content: space-between;
-    font-size: 14px;
-  }
-  .history-row .hw { font-weight: 700; }
-  .history-row .hw.x { color: var(--x); }
-  .history-row .hw.o { color: var(--o); }
-  .history-row .hw.d { color: var(--gold); }
-  .history-row .htime { color: var(--sub); font-size: 12px; }
+  /* HISTORY */
+  #screen-history { gap:16px; padding-bottom:40px; }
+  .history-list { width:100%; max-width:460px; display:flex; flex-direction:column; gap:8px; }
+  .history-row { background:var(--s1); border:1px solid var(--border); border-radius:12px; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; font-size:14px; }
+  .history-row .hw { font-weight:700; }
+  .history-row .hw.x { color:var(--x); }
+  .history-row .hw.o { color:var(--o); }
+  .history-row .hw.d { color:var(--gold); }
+  .history-row .htime { color:var(--sub); font-size:12px; }
 
-  /* ── ONLINE SETUP ─────────────────────────────────────────── */
-  #screen-online { gap: 16px; }
+  .status-badge { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--sub); background:var(--s2); border:1px solid var(--border); border-radius:20px; padding:5px 12px; margin-bottom:12px; }
+  .status-dot { width:7px; height:7px; border-radius:50%; background:var(--sub); }
+  .status-dot.online { background:#2ECC71; box-shadow:0 0 6px #2ECC71; }
 
-  /* ── TOAST ────────────────────────────────────────────────── */
-  #toast {
-    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
-    background: var(--s2); border: 1px solid var(--border);
-    border-radius: 10px; padding: 12px 22px;
-    font-size: 14px; font-weight: 700; color: var(--txt);
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.3s, transform 0.3s;
-    z-index: 200; white-space: nowrap;
-  }
-  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .confetti-piece { position:fixed; width:10px; height:10px; border-radius:2px; top:-10px; pointer-events:none; z-index:300; animation:confettiFall linear both; }
+  @keyframes confettiFall { 0%{top:-10px;opacity:1;} 100%{top:105vh;opacity:0;} }
 
-  /* ── STATUS BADGE (online) ────────────────────────────────── */
-  .status-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 12px; font-weight: 700; color: var(--sub);
-    background: var(--s2); border: 1px solid var(--border);
-    border-radius: 20px; padding: 5px 12px;
-    margin-bottom: 12px;
-  }
-  .status-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--sub);
-  }
-  .status-dot.online { background: #2ECC71; box-shadow: 0 0 6px #2ECC71; }
-
-  /* ── CONFETTI ─────────────────────────────────────────────── */
-  .confetti-piece {
-    position: fixed;
-    width: 10px; height: 10px;
-    border-radius: 2px;
-    top: -10px;
-    pointer-events: none;
-    z-index: 300;
-    animation: confettiFall linear both;
-  }
-  @keyframes confettiFall {
-    0%   { top: -10px; opacity: 1; }
-    100% { top: 105vh; opacity: 0; }
-  }
-
-  /* ── HELPERS ──────────────────────────────────────────────── */
-  .gap { height: 8px; }
-  .row { display: flex; gap: 10px; width: 100%; }
-  .row .btn { flex: 1; }
-  .screen-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 32px; letter-spacing: 3px;
-    margin-bottom: 4px; text-align: center;
-  }
-  .screen-sub {
-    color: var(--sub); font-size: 13px; text-align: center;
-    margin-bottom: 20px;
-  }
-
-  /* ── CONFIG NOTICE ────────────────────────────────────────── */
-  #config-notice {
-    position: fixed; top: 0; left: 0; right: 0;
-    background: linear-gradient(90deg, rgba(255,71,87,0.9), rgba(255,140,0,0.9));
-    color: white; font-size: 13px; font-weight: 700;
-    text-align: center; padding: 10px 16px;
-    z-index: 500; display: none;
-  }
-
-  @media (max-width: 400px) {
-    .scorebar { gap: 6px; }
-    .player-score { padding: 10px 10px; }
-    .player-score .pts { font-size: 28px; }
-  }
+  #toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--s2); border:1px solid var(--border); border-radius:10px; padding:12px 22px; font-size:14px; font-weight:700; color:var(--txt); opacity:0; pointer-events:none; transition:opacity 0.3s,transform 0.3s; z-index:200; white-space:nowrap; }
+  #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
-<!-- ══════════════════ CONFIG NOTICE ════════════════════ -->
-<div id="config-notice">
-  ⚠️ Online multiplayer needs your Supabase URL & Key — see the setup instructions below the game.
-</div>
-
-<!-- ══════════════════ TOAST ════════════════════════════ -->
 <div id="toast"></div>
 
-<!-- ══════════════════ RESULT OVERLAY ═══════════════════ -->
+<!-- RESULT OVERLAY -->
 <div id="result-overlay">
   <div class="result-card">
     <div class="result-emoji" id="result-emoji">🏆</div>
     <div class="result-title" id="result-title">X WINS!</div>
-    <div class="result-sub"  id="result-sub">Well played</div>
+    <div class="result-sub"   id="result-sub">Well played</div>
     <div class="result-btns">
       <button class="btn btn-primary" onclick="playAgain()">Play Again</button>
       <button class="btn btn-ghost"   onclick="goHome()">Home</button>
@@ -496,30 +187,22 @@
   </div>
 </div>
 
-<!-- ══════════════════ SCREEN: HOME ═════════════════════ -->
+<!-- HOME -->
 <div class="screen active" id="screen-home">
   <div class="logo">TIC TAC TOE</div>
   <div class="tagline">Classic · Local · Online</div>
-
   <div class="card">
     <div class="section-title">Choose Mode</div>
-    <button class="btn btn-primary" onclick="showScreen('setup-local')">
-      🎮 &nbsp; Local — 2 Players
-    </button>
-    <button class="btn btn-secondary" onclick="showScreen('online')">
-      🌐 &nbsp; Online Multiplayer
-    </button>
-    <button class="btn btn-ghost" onclick="showHistory()">
-      📜 &nbsp; Game History
-    </button>
+    <button class="btn btn-primary"   onclick="showScreen('setup-local')">🎮 &nbsp; Local — 2 Players</button>
+    <button class="btn btn-secondary" onclick="showScreen('online')">🌐 &nbsp; Online Multiplayer</button>
+    <button class="btn btn-ghost"     onclick="showHistory()">📜 &nbsp; Game History</button>
   </div>
 </div>
 
-<!-- ══════════════════ SCREEN: LOCAL SETUP ══════════════ -->
+<!-- LOCAL SETUP -->
 <div class="screen" id="screen-setup-local">
   <div class="screen-title">Local Game</div>
   <div class="screen-sub">Both players on this device</div>
-
   <div class="card">
     <div class="field">
       <label>Player 1 — plays X</label>
@@ -534,63 +217,33 @@
   </div>
 </div>
 
-<!-- ══════════════════ SCREEN: ONLINE SETUP ═════════════ -->
+<!-- ONLINE SETUP -->
 <div class="screen" id="screen-online">
   <div class="screen-title">Online Multiplayer</div>
   <div class="screen-sub">Play with a friend on another device</div>
-
   <div class="card">
     <div class="field">
       <label>Your Name</label>
       <input id="online-name" type="text" placeholder="Enter your name…" maxlength="20"/>
     </div>
-    <button class="btn btn-primary" onclick="createRoom()">
-      ✚ &nbsp; Create Room
-    </button>
-    <div style="text-align:center; color:var(--sub); font-size:13px; margin: 8px 0;">— or —</div>
+    <button class="btn btn-primary" onclick="createRoom()">✚ &nbsp; Create Room</button>
+    <div style="text-align:center;color:var(--sub);font-size:13px;margin:8px 0;">— or —</div>
     <div class="field">
       <label>Room Code</label>
-      <input id="room-code-input" type="text" placeholder="Enter 6-digit code…"
-             maxlength="6" style="text-transform:uppercase; letter-spacing:4px; font-size:18px;
-             font-family:'Bebas Neue',sans-serif; text-align:center;"/>
+      <input id="room-code-input" type="text" placeholder="Enter 6-digit code…" maxlength="6"
+             style="text-transform:uppercase;letter-spacing:4px;font-size:18px;font-family:'Bebas Neue',sans-serif;text-align:center;"/>
     </div>
-    <button class="btn btn-secondary" onclick="joinRoom()">
-      → &nbsp; Join Room
-    </button>
-    <button class="btn btn-ghost" onclick="showScreen('home')">← Back</button>
-  </div>
-
-  <!-- Supabase config card -->
-  <div class="card" id="supabase-config-card">
-    <div class="section-title">⚙️ Supabase Config (Online only)</div>
-    <div class="field">
-      <label>Project URL</label>
-      <input id="cfg-url" type="text" placeholder="https://xxxx.supabase.co"/>
-    </div>
-    <div class="field">
-      <label>Anon Public Key</label>
-      <input id="cfg-key" type="text" placeholder="eyJ…"/>
-    </div>
-    <button class="btn btn-ghost btn-sm" style="width:100%;" onclick="saveConfig()">
-      💾 Save Config
-    </button>
-    <p style="color:var(--sub);font-size:12px;margin-top:10px;line-height:1.6;">
-      Create a free project at <strong style="color:var(--txt)">supabase.com</strong>.
-      See the full setup guide at the bottom of this page.
-    </p>
+    <button class="btn btn-secondary" onclick="joinRoom()">→ &nbsp; Join Room</button>
+    <button class="btn btn-ghost"     onclick="showScreen('home')">← Back</button>
   </div>
 </div>
 
-<!-- ══════════════════ SCREEN: GAME ═════════════════════ -->
+<!-- GAME -->
 <div class="screen" id="screen-game">
-
-  <!-- Status badge (online mode) -->
   <div class="status-badge" id="online-badge" style="display:none">
     <div class="status-dot online"></div>
     <span id="online-badge-text">Online</span>
   </div>
-
-  <!-- Score bar -->
   <div class="scorebar">
     <div class="player-score x-side" id="score-x">
       <div class="sym">✕</div>
@@ -604,122 +257,70 @@
       <div class="pts"   id="pts-o">0</div>
     </div>
   </div>
-
-  <!-- Turn indicator -->
   <div class="turn-bar tx" id="turn-bar">
     <span id="turn-text">Player 1's turn</span>
     <span class="turn-sym" id="turn-sym" style="color:var(--x)">✕</span>
   </div>
-
-  <!-- Board -->
   <div class="board-wrap">
     <div class="board" id="board"></div>
-    <!-- Online waiting overlay -->
     <div class="online-overlay hidden" id="online-overlay">
       <div class="spinner"></div>
       <p id="overlay-msg">Waiting for opponent…</p>
       <div class="room-code-display" id="overlay-code" style="display:none"></div>
-      <p id="overlay-hint" style="font-size:12px; margin-top:4px;"></p>
+      <p id="overlay-hint" style="font-size:12px;margin-top:4px;"></p>
     </div>
   </div>
-
-  <!-- Actions -->
   <div class="game-actions">
     <button class="btn btn-ghost btn-sm" onclick="resetBoard()" style="flex:1">↺ Restart</button>
     <button class="btn btn-ghost btn-sm" onclick="goHome()"     style="flex:1">⌂ Home</button>
   </div>
 </div>
 
-<!-- ══════════════════ SCREEN: HISTORY ══════════════════ -->
+<!-- HISTORY -->
 <div class="screen" id="screen-history">
   <div class="screen-title">Game History</div>
   <div id="history-list" class="history-list">
-    <p style="color:var(--sub); text-align:center; font-size:14px;">No games played yet.</p>
+    <p style="color:var(--sub);text-align:center;font-size:14px;">No games played yet.</p>
   </div>
-  <button class="btn btn-ghost btn-sm" onclick="showScreen('home')" style="max-width:460px;width:100%;margin-top:8px;">
-    ← Back
-  </button>
+  <button class="btn btn-ghost btn-sm" onclick="showScreen('home')" style="max-width:460px;width:100%;margin-top:8px;">← Back</button>
 </div>
 
-<!-- ══════════════════ SETUP GUIDE ═══════════════════════ -->
-<div style="position:relative;z-index:1;max-width:460px;margin:0 auto 60px;padding:0 16px;">
-  <div class="card" style="margin-top:0">
-    <div class="section-title">📖 Online Multiplayer Setup Guide</div>
-    <div style="color:var(--sub);font-size:13px;line-height:1.8;">
-      <p><strong style="color:var(--txt)">1.</strong> Go to <strong style="color:var(--txt)">supabase.com</strong> → create a free account → New Project.</p>
-      <p><strong style="color:var(--txt)">2.</strong> In the SQL Editor, run this SQL:</p>
-      <pre style="background:var(--s2);border-radius:8px;padding:12px;margin:8px 0;font-size:12px;overflow-x:auto;color:#90EE90;">
-CREATE TABLE IF NOT EXISTS ttt_games (
-  id         TEXT PRIMARY KEY,
-  board      TEXT    DEFAULT 'EEEEEEEEE',
-  p1_name    TEXT    DEFAULT 'Player 1',
-  p2_name    TEXT    DEFAULT '',
-  turn       TEXT    DEFAULT 'X',
-  status     TEXT    DEFAULT 'waiting',
-  winner     TEXT    DEFAULT '',
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Allow public read/write (for this demo)
-ALTER TABLE ttt_games ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "public_all" ON ttt_games FOR ALL USING (true) WITH CHECK (true);</pre>
-      <p><strong style="color:var(--txt)">3.</strong> Go to Settings → API → copy your Project URL and anon key.</p>
-      <p><strong style="color:var(--txt)">4.</strong> Paste them into the Supabase Config section above → Save Config.</p>
-      <p><strong style="color:var(--txt)">5.</strong> Enable Realtime on the table: Database → Replication → toggle <em>ttt_games</em> on.</p>
-      <p style="margin-top:10px;color:var(--txt);">That's it! Create a room, share the 6-digit code with your friend. ✅</p>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════ JAVASCRIPT ════════════════════════ -->
 <script>
-// ═══════════════════════════════════════════════════════════════
-// CONFIG & STATE
-// ═══════════════════════════════════════════════════════════════
-let SUPA_URL = localStorage.getItem('supa_url') || '';
-let SUPA_KEY = localStorage.getItem('supa_key') || '';
+// ═══════════════════════════════════════════════
+// CONFIG — hardcoded, no setup needed
+// ═══════════════════════════════════════════════
+const SUPA_URL = 'https://rzgviruyvwcypuhuoulq.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6Z3ZpcnV5dndjeXB1aHVvdWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMTA0MzEsImV4cCI6MjA5NDY4NjQzMX0.DgX286zpHnXDA8OAoXJ4tbt0MKwVMkJPHg6YZduCGME';
 
-// Pre-fill config inputs if saved
-window.addEventListener('DOMContentLoaded', () => {
-  if (SUPA_URL) document.getElementById('cfg-url').value = SUPA_URL;
-  if (SUPA_KEY) document.getElementById('cfg-key').value = SUPA_KEY;
-});
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+var board      = ['E','E','E','E','E','E','E','E','E'];
+var scores     = { X: 0, O: 0 };
+var gameActive = false;
+var p1         = 'Player 1';
+var p2         = 'Player 2';
+var gameMode   = 'local';
+var mySymbol   = 'X';
+var roomId     = null;
+var pollInterval = null;
 
-function saveConfig() {
-  SUPA_URL = document.getElementById('cfg-url').value.trim().replace(/\/$/, '');
-  SUPA_KEY = document.getElementById('cfg-key').value.trim();
-  if (!SUPA_URL || !SUPA_KEY) { toast('Please fill in both fields.'); return; }
-  localStorage.setItem('supa_url', SUPA_URL);
-  localStorage.setItem('supa_key', SUPA_KEY);
-  toast('✅ Config saved!');
-}
-
-// ── Game state ────────────────────────────────────────────────
-let board       = Array(9).fill('E');   // E = empty, X, O
-let scores      = { X: 0, O: 0 };
-let gameActive  = false;
-let p1          = 'Player 1';
-let p2          = 'Player 2';
-let gameMode    = 'local';              // 'local' | 'online'
-let mySymbol    = 'X';                  // online: what symbol am I
-let roomId      = null;
-let realtimeSub = null;
-
-// ── Win patterns (indices into board array) ───────────────────
-const WIN_PATTERNS = [
-  [0,1,2],[3,4,5],[6,7,8],   // rows
-  [0,3,6],[1,4,7],[2,5,8],   // cols
-  [0,4,8],[2,4,6]            // diagonals
+var WIN_PATTERNS = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
 ];
 
-// ═══════════════════════════════════════════════════════════════
-// SCREEN NAVIGATION
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
 function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById('screen-' + name);
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) {
+    screens[i].classList.remove('active');
+  }
+  var el = document.getElementById('screen-' + name);
   if (el) el.classList.add('active');
-  // scroll to top
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -729,12 +330,14 @@ function goHome() {
   showScreen('home');
 }
 
-// ═══════════════════════════════════════════════════════════════
-// LOCAL GAME — PHASE 1
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// LOCAL GAME
+// ═══════════════════════════════════════════════
 function startLocalGame() {
-  p1 = document.getElementById('p1name').value.trim() || 'Player 1';
-  p2 = document.getElementById('p2name').value.trim() || 'Player 2';
+  var n1 = document.getElementById('p1name').value.trim();
+  var n2 = document.getElementById('p2name').value.trim();
+  p1 = n1 || 'Player 1';
+  p2 = n2 || 'Player 2';
   gameMode = 'local';
   scores = { X: 0, O: 0 };
   initGame();
@@ -742,151 +345,143 @@ function startLocalGame() {
 }
 
 function initGame() {
-  board       = Array(9).fill('E');
-  gameActive  = true;
-
-  // Update name labels
+  board = ['E','E','E','E','E','E','E','E','E'];
+  gameActive = true;
   document.getElementById('name-x').textContent = p1;
   document.getElementById('name-o').textContent = p2;
   document.getElementById('pts-x').textContent  = scores.X;
   document.getElementById('pts-o').textContent  = scores.O;
-
   renderBoard();
   updateTurnUI();
-
-  // Online overlay
-  document.getElementById('online-badge').style.display = gameMode === 'online' ? 'inline-flex' : 'none';
+  document.getElementById('online-badge').style.display = (gameMode === 'online') ? 'inline-flex' : 'none';
 }
 
 function renderBoard() {
-  const el = document.getElementById('board');
+  var el = document.getElementById('board');
   el.innerHTML = '';
-  board.forEach((cell, i) => {
-    const div = document.createElement('div');
-    div.className = 'cell' + (cell !== 'E' ? ' taken ' + cell.toLowerCase() : '');
-    div.textContent = cell === 'X' ? '✕' : cell === 'O' ? '○' : '';
-    div.addEventListener('click', () => handleCellClick(i));
-    el.appendChild(div);
-  });
+  for (var i = 0; i < 9; i++) {
+    (function(idx) {
+      var div = document.createElement('div');
+      var cell = board[idx];
+      var cls = 'cell';
+      if (cell !== 'E') cls += ' taken ' + cell.toLowerCase();
+      div.className = cls;
+      div.textContent = cell === 'X' ? '✕' : cell === 'O' ? '○' : '';
+      div.addEventListener('click', function() { handleCellClick(idx); });
+      el.appendChild(div);
+    })(i);
+  }
 }
 
 function currentTurnSymbol() {
-  const xs = board.filter(c => c === 'X').length;
-  const os = board.filter(c => c === 'O').length;
+  var xs = 0, os = 0;
+  for (var i = 0; i < 9; i++) {
+    if (board[i] === 'X') xs++;
+    else if (board[i] === 'O') os++;
+  }
   return xs === os ? 'X' : 'O';
 }
 
 function handleCellClick(index) {
-  if (!gameActive)               return;
-  if (board[index] !== 'E')     return;
-
-  // Online: only allow clicking on your turn
-  if (gameMode === 'online') {
-    if (currentTurnSymbol() !== mySymbol) {
-      toast("It's not your turn!");
-      return;
-    }
+  if (!gameActive) return;
+  if (board[index] !== 'E') return;
+  if (gameMode === 'online' && currentTurnSymbol() !== mySymbol) {
+    showToast("It's not your turn!");
+    return;
   }
-
-  const sym = currentTurnSymbol();
+  var sym = currentTurnSymbol();
   board[index] = sym;
   renderBoard();
   updateTurnUI();
-
-  // Online: push to Supabase
-  if (gameMode === 'online') {
-    pushBoardToSupabase(sym);
-  }
-
+  if (gameMode === 'online') pushBoard();
   checkGameOver(sym);
 }
 
 function updateTurnUI() {
-  const sym  = currentTurnSymbol();
-  const name = sym === 'X' ? p1 : p2;
-  const bar  = document.getElementById('turn-bar');
-  const txt  = document.getElementById('turn-text');
-  const icon = document.getElementById('turn-sym');
-  const sx   = document.getElementById('score-x');
-  const so   = document.getElementById('score-o');
-
-  txt.textContent  = `${name}'s turn`;
+  var sym  = currentTurnSymbol();
+  var name = sym === 'X' ? p1 : p2;
+  var bar  = document.getElementById('turn-bar');
+  var txt  = document.getElementById('turn-text');
+  var icon = document.getElementById('turn-sym');
+  var sx   = document.getElementById('score-x');
+  var so   = document.getElementById('score-o');
+  txt.textContent  = name + "'s turn";
   icon.textContent = sym === 'X' ? '✕' : '○';
   icon.style.color = sym === 'X' ? 'var(--x)' : 'var(--o)';
   bar.className    = 'turn-bar ' + (sym === 'X' ? 'tx' : 'to');
-
   sx.className = 'player-score x-side' + (sym === 'X' ? ' active-x' : '');
   so.className = 'player-score o-side' + (sym === 'O' ? ' active-o' : '');
 }
 
+function checkWin(sym) {
+  for (var i = 0; i < WIN_PATTERNS.length; i++) {
+    var p = WIN_PATTERNS[i];
+    if (board[p[0]] === sym && board[p[1]] === sym && board[p[2]] === sym) return true;
+  }
+  return false;
+}
+
+function getWinPattern(sym) {
+  for (var i = 0; i < WIN_PATTERNS.length; i++) {
+    var p = WIN_PATTERNS[i];
+    if (board[p[0]] === sym && board[p[1]] === sym && board[p[2]] === sym) return p;
+  }
+  return null;
+}
+
 function checkGameOver(sym) {
-  const won  = checkWin(sym);
-  const draw = !won && board.every(c => c !== 'E');
+  var won  = checkWin(sym);
+  var full = true;
+  for (var i = 0; i < 9; i++) { if (board[i] === 'E') { full = false; break; } }
+  var draw = !won && full;
 
   if (won) {
     gameActive = false;
     highlightWin(sym);
-    setTimeout(() => showResult(sym, false), 400);
-    confetti();
-
-    // Phase 2: save to Supabase
-    const winner = sym === 'X' ? p1 : p2;
-    saveResultToSupabase(p1, p2, winner);
-
+    setTimeout(function() { showResult(sym, false); }, 400);
+    launchConfetti();
+    var winnerName = sym === 'X' ? p1 : p2;
+    saveResult(p1, p2, winnerName);
     if (gameMode === 'online') finishOnlineGame(sym);
     return;
   }
   if (draw) {
     gameActive = false;
-    setTimeout(() => showResult(null, true), 200);
-    saveResultToSupabase(p1, p2, 'Draw');
+    setTimeout(function() { showResult(null, true); }, 200);
+    saveResult(p1, p2, 'Draw');
     if (gameMode === 'online') finishOnlineGame('Draw');
   }
 }
 
-function checkWin(sym) {
-  return WIN_PATTERNS.some(([a,b,c]) =>
-    board[a] === sym && board[b] === sym && board[c] === sym
-  );
-}
-
-function getWinPattern(sym) {
-  return WIN_PATTERNS.find(([a,b,c]) =>
-    board[a] === sym && board[b] === sym && board[c] === sym
-  );
-}
-
 function highlightWin(sym) {
-  const pattern = getWinPattern(sym);
+  var pattern = getWinPattern(sym);
   if (!pattern) return;
-  const cells = document.querySelectorAll('.cell');
-  pattern.forEach(i => {
-    cells[i].classList.add(sym === 'X' ? 'win-x' : 'win-o');
-  });
+  var cells = document.querySelectorAll('.cell');
+  for (var i = 0; i < pattern.length; i++) {
+    cells[pattern[i]].classList.add(sym === 'X' ? 'win-x' : 'win-o');
+  }
 }
 
 function showResult(sym, isDraw) {
-  const overlay = document.getElementById('result-overlay');
-  const emoji   = document.getElementById('result-emoji');
-  const title   = document.getElementById('result-title');
-  const sub     = document.getElementById('result-sub');
-
+  var overlay = document.getElementById('result-overlay');
+  var emoji   = document.getElementById('result-emoji');
+  var title   = document.getElementById('result-title');
+  var sub     = document.getElementById('result-sub');
   if (isDraw) {
-    emoji.textContent      = '🤝';
-    title.textContent      = "IT'S A DRAW";
-    title.className        = 'result-title draw';
-    sub.textContent        = 'No winner this time!';
+    emoji.textContent = '🤝';
+    title.textContent = "IT'S A DRAW";
+    title.className   = 'result-title draw';
+    sub.textContent   = 'No winner this time!';
   } else {
-    const name             = sym === 'X' ? p1 : p2;
-    emoji.textContent      = '🏆';
-    title.textContent      = `${name} Wins!`;
-    title.className        = 'result-title ' + (sym === 'X' ? 'x-wins' : 'o-wins');
-    sub.textContent        = `${sym} takes the point!`;
+    var name = sym === 'X' ? p1 : p2;
+    emoji.textContent = '🏆';
+    title.textContent = name + ' Wins!';
+    title.className   = 'result-title ' + (sym === 'X' ? 'x-wins' : 'o-wins');
+    sub.textContent   = sym + ' takes the point!';
     scores[sym]++;
     document.getElementById('pts-x').textContent = scores.X;
     document.getElementById('pts-o').textContent = scores.O;
   }
-
   overlay.classList.add('show');
 }
 
@@ -899,7 +494,7 @@ function playAgain() {
   if (gameMode === 'online') {
     resetOnlineBoard();
   } else {
-    board      = Array(9).fill('E');
+    board = ['E','E','E','E','E','E','E','E','E'];
     gameActive = true;
     renderBoard();
     updateTurnUI();
@@ -908,275 +503,171 @@ function playAgain() {
 
 function resetBoard() {
   closeResult();
-  board      = Array(9).fill('E');
+  board = ['E','E','E','E','E','E','E','E','E'];
   gameActive = true;
   renderBoard();
   updateTurnUI();
-  if (gameMode === 'online') pushBoardToSupabase(null, true);
+  if (gameMode === 'online') pushBoard();
 }
 
-// ═══════════════════════════════════════════════════════════════
-// PHASE 2 — SAVE RESULTS TO SUPABASE
-// ═══════════════════════════════════════════════════════════════
-async function saveResultToSupabase(player1, player2, winner) {
-  if (!SUPA_URL || !SUPA_KEY) return;  // silently skip if not configured
-  try {
-    const body = JSON.stringify({ player1, player2, winner });
-    await fetch(`${SUPA_URL}/rest/v1/ttt_results`, {
-      method: 'POST',
-      headers: {
-        'apikey':        SUPA_KEY,
-        'Authorization': `Bearer ${SUPA_KEY}`,
-        'Content-Type':  'application/json',
-        'Prefer':        'return=minimal'
-      },
-      body
-    });
-    console.log('[Supabase] Result saved:', player1, 'vs', player2, '→', winner);
-  } catch(e) {
-    console.warn('[Supabase] Save failed:', e.message);
-  }
+// ═══════════════════════════════════════════════
+// SUPABASE REST HELPERS
+// ═══════════════════════════════════════════════
+function sbHeaders() {
+  return {
+    'apikey':        SUPA_KEY,
+    'Authorization': 'Bearer ' + SUPA_KEY,
+    'Content-Type':  'application/json'
+  };
 }
 
-// ═══════════════════════════════════════════════════════════════
-// PHASE 3 — ONLINE MULTIPLAYER
-// ═══════════════════════════════════════════════════════════════
-
-// ── Supabase REST helpers ─────────────────────────────────────
-async function sbGet(table, filter) {
-  const url = `${SUPA_URL}/rest/v1/${table}?${filter}&limit=1`;
-  const r = await fetch(url, {
-    headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
-  });
-  const data = await r.json();
-  return data[0] || null;
+function sbGet(table, filter) {
+  return fetch('https://rzgviruyvwcypuhuoulq.supabase.co/rest/v1/' + table + '?' + filter + '&limit=1', {
+    headers: sbHeaders()
+  }).then(function(r) { return r.json(); }).then(function(d) { return Array.isArray(d) ? d[0] : d; });
 }
 
-async function sbInsert(table, obj) {
-  const r = await fetch(`${SUPA_URL}/rest/v1/${table}`, {
+function sbInsert(table, obj) {
+  return fetch('https://rzgviruyvwcypuhuoulq.supabase.co/rest/v1/' + table, {
     method: 'POST',
-    headers: {
-      'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}`,
-      'Content-Type': 'application/json', 'Prefer': 'return=representation'
-    },
+    headers: Object.assign({}, sbHeaders(), { 'Prefer': 'return=representation' }),
     body: JSON.stringify(obj)
-  });
-  const data = await r.json();
-  return data[0] || null;
+  }).then(function(r) { return r.json(); }).then(function(d) { return Array.isArray(d) ? d[0] : d; });
 }
 
-async function sbPatch(table, filter, obj) {
-  await fetch(`${SUPA_URL}/rest/v1/${table}?${filter}`, {
+function sbPatch(table, filter, obj) {
+  return fetch('https://rzgviruyvwcypuhuoulq.supabase.co/rest/v1/' + table + '?' + filter, {
     method: 'PATCH',
-    headers: {
-      'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}`,
-      'Content-Type': 'application/json'
-    },
+    headers: sbHeaders(),
     body: JSON.stringify(obj)
   });
 }
+// ═══════════════════════════════════════════════
+// PHASE 2 — SAVE RESULTS
+// ═══════════════════════════════════════════════
+function saveResult(player1, player2, winner) {
+  addToHistory(player1, player2, winner);
+  sbInsert('ttt_results', { player1: player1, player2: player2, winner: winner })
+    .then(function() { console.log('[DB] Result saved'); })
+    .catch(function(e) { console.warn('[DB] Save failed:', e); });
+}
 
-// ── Generate a random 6-char room code ───────────────────────
+// ═══════════════════════════════════════════════
+// PHASE 3 — ONLINE MULTIPLAYER
+// ═══════════════════════════════════════════════
 function makeCode() {
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
+  return Math.random().toString(36).substring(2, 6).toUpperCase();
 }
 
-// ── CREATE ROOM ───────────────────────────────────────────────
-async function createRoom() {
-  if (!SUPA_URL || !SUPA_KEY) {
-    toast('⚠️ Please enter your Supabase URL & Key first!');
-    document.getElementById('config-notice').style.display = 'block';
-    return;
-  }
-  const name = document.getElementById('online-name').value.trim() || 'Player 1';
-  p1       = name;
-  mySymbol = 'X';
-  gameMode = 'online';
-  roomId   = makeCode();
-
+function createRoom() {
+  var name = document.getElementById('online-name').value.trim() || 'Player 1';
+  p1 = name; mySymbol = 'X'; gameMode = 'online';
+  roomId = makeCode();
   showScreen('game');
-  showOnlineOverlay(`Share this code with your friend:`, roomId,
-    'They join → game starts automatically');
-
-  try {
-    await sbInsert('ttt_games', {
-      id:      roomId,
-      board:   'EEEEEEEEE',
-      p1_name: p1,
-      p2_name: '',
-      turn:    'X',
-      status:  'waiting',
-      winner:  ''
-    });
-    subscribeToRoom(roomId);
-  } catch(e) {
-    toast('Error creating room: ' + e.message);
-    console.error(e);
-  }
+  showOnlineOverlay('Share this code with your friend:', roomId, 'Waiting for opponent to join…');
+  sbInsert('ttt_games', {
+    id: roomId, board: 'EEEEEEEEE', p1_name: p1, p2_name: '',
+    turn: 'X', status: 'waiting', winner: ''
+  }).then(function() {
+    startPolling(roomId);
+  }).catch(function(e) { showToast('Error creating room: ' + e.message); });
 }
 
-// ── JOIN ROOM ─────────────────────────────────────────────────
-async function joinRoom() {
-  if (!SUPA_URL || !SUPA_KEY) {
-    toast('⚠️ Please enter your Supabase URL & Key first!');
-    document.getElementById('config-notice').style.display = 'block';
-    return;
-  }
-  const code = document.getElementById('room-code-input').value.trim().toUpperCase();
-  const name = document.getElementById('online-name').value.trim() || 'Player 2';
-  if (code.length < 4) { toast('Enter a valid room code.'); return; }
-
-  p2       = name;
-  mySymbol = 'O';
-  gameMode = 'online';
-  roomId   = code;
-
+function joinRoom() {
+  var code = document.getElementById('room-code-input').value.trim().toUpperCase();
+  var name = document.getElementById('online-name').value.trim() || 'Player 2';
+  if (code.length < 4) { showToast('Enter a valid room code.'); return; }
+  p2 = name; mySymbol = 'O'; gameMode = 'online'; roomId = code;
   showScreen('game');
-  showOnlineOverlay('Joining room…', null, 'Connecting to your friend');
-
-  try {
-    const row = await sbGet('ttt_games', `id=eq.${code}`);
-    if (!row) { toast('Room not found. Check the code.'); showScreen('online'); return; }
-    if (row.status !== 'waiting') { toast('Game already started.'); showScreen('online'); return; }
-
+  showOnlineOverlay('Joining room…', null, 'Connecting…');
+  sbGet('ttt_games', 'id=eq.' + code).then(function(row) {
+    if (!row) { showToast('Room not found.'); showScreen('online'); return; }
+    if (row.status !== 'waiting') { showToast('Game already in progress.'); showScreen('online'); return; }
     p1 = row.p1_name;
-    await sbPatch('ttt_games', `id=eq.${code}`, { p2_name: p2, status: 'active' });
-    subscribeToRoom(code);
-  } catch(e) {
-    toast('Error joining room: ' + e.message);
-    console.error(e);
-  }
-}
-
-// ── SUPABASE REALTIME SUBSCRIPTION ───────────────────────────
-function subscribeToRoom(code) {
-  if (!window.RealtimeChannel) {
-    // Realtime not available — fall back to polling
-    pollRoom(code);
-    return;
-  }
-  // (If the user has the full Supabase JS SDK loaded this would work;
-  // here we use polling which works with just the REST API.)
-  pollRoom(code);
-}
-
-let pollInterval = null;
-function pollRoom(code) {
+    return sbPatch('ttt_games', 'id=eq.' + code, { p2_name: p2, status: 'active' });
+  }).then(function() {
+    startPolling(code);
+  }).catch(function(e) { showToast('Error: ' + e.message); });
+}function startPolling(code) {
   if (pollInterval) clearInterval(pollInterval);
-  pollInterval = setInterval(async () => {
-    try {
-      const row = await sbGet('ttt_games', `id=eq.${code}`);
-      if (!row) return;
-      applyRemoteState(row);
-    } catch(e) {}
-  }, 1000);
+  pollInterval = setInterval(function() {
+    sbGet('ttt_games', 'id=eq.' + code).then(function(row) {
+      if (row) applyRemoteState(row);
+    }).catch(function() {});
+  }, 1200);
 }
 
 function applyRemoteState(row) {
-  // Update player names
   p1 = row.p1_name || 'Player 1';
   p2 = row.p2_name || '…waiting';
   document.getElementById('name-x').textContent = p1;
   document.getElementById('name-o').textContent = p2;
 
-  // If still waiting for P2
   if (row.status === 'waiting') {
-    showOnlineOverlay('Share this code with your friend:', row.id,
-      'Waiting for opponent to join…');
+    showOnlineOverlay('Share this code with your friend:', row.id, 'Waiting for opponent…');
     return;
   }
 
-  // Game is active or finished
   hideOnlineOverlay();
   document.getElementById('online-badge').style.display = 'inline-flex';
-  document.getElementById('online-badge-text').textContent =
-    `Room: ${row.id}  ·  You are ${mySymbol}`;
+  document.getElementById('online-badge-text').textContent = 'Room: ' + row.id + '  ·  You are ' + mySymbol;
 
-  // Sync board
-  const newBoard = row.board.split('');
-  const changed  = newBoard.some((c, i) => c !== board[i]);
-  if (changed) {
-    board = newBoard;
-    renderBoard();
-    updateTurnUI();
-  }
+  var newBoard = row.board.split('');
+  var changed = false;
+  for (var i = 0; i < 9; i++) { if (newBoard[i] !== board[i]) { changed = true; break; } }
+  if (changed) { board = newBoard; renderBoard(); updateTurnUI(); }
 
-  // Check if game finished remotely
   if (row.status === 'done' && gameActive) {
     gameActive = false;
     if (row.winner && row.winner !== 'Draw') {
       highlightWin(row.winner);
-      setTimeout(() => showResult(row.winner, false), 400);
-      confetti();
+      setTimeout(function() { showResult(row.winner, false); }, 400);
+      launchConfetti();
     } else {
-      setTimeout(() => showResult(null, true), 200);
+      setTimeout(function() { showResult(null, true); }, 200);
     }
   }
 
-  // Re-init game if reset
   if (row.status === 'active' && row.board === 'EEEEEEEEE' && !gameActive) {
-    board      = Array(9).fill('E');
+    board = ['E','E','E','E','E','E','E','E','E'];
     gameActive = true;
     renderBoard();
     updateTurnUI();
   }
 }
 
-// ── PUSH LOCAL MOVE TO SUPABASE ───────────────────────────────
-async function pushBoardToSupabase(sym, isReset = false) {
+function pushBoard() {
   if (!roomId) return;
-  try {
-    const boardStr = board.join('');
-    const turn     = currentTurnSymbol();
-    await sbPatch('ttt_games', `id=eq.${roomId}`, {
-      board:  boardStr,
-      turn:   turn,
-      status: isReset ? 'active' : 'active'
-    });
-  } catch(e) {
-    console.warn('[Supabase] Push failed:', e.message);
-  }
+  sbPatch('ttt_games', 'id=eq.' + roomId, {
+    board: board.join(''), turn: currentTurnSymbol(), status: 'active'
+  }).catch(function(e) { console.warn('[DB] Push failed:', e); });
 }
 
-async function finishOnlineGame(winner) {
+function finishOnlineGame(winner) {
   if (!roomId) return;
-  try {
-    await sbPatch('ttt_games', `id=eq.${roomId}`, {
-      status: 'done',
-      winner: String(winner)
-    });
-  } catch(e) {}
+  sbPatch('ttt_games', 'id=eq.' + roomId, { status: 'done', winner: String(winner) });
 }
 
-async function resetOnlineBoard() {
-  board      = Array(9).fill('E');
+function resetOnlineBoard() {
+  board = ['E','E','E','E','E','E','E','E','E'];
   gameActive = true;
   renderBoard();
   updateTurnUI();
   if (!roomId) return;
-  try {
-    await sbPatch('ttt_games', `id=eq.${roomId}`, {
-      board:  'EEEEEEEEE',
-      turn:   'X',
-      status: 'active',
-      winner: ''
-    });
-  } catch(e) {}
+  sbPatch('ttt_games', 'id=eq.' + roomId, { board: 'EEEEEEEEE', turn: 'X', status: 'active', winner: '' });
 }
 
 function disconnectOnline() {
   if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
-  gameMode = 'local';
-  roomId   = null;
+  gameMode = 'local'; roomId = null;
 }
 
-// ── OVERLAY helpers ───────────────────────────────────────────
 function showOnlineOverlay(msg, code, hint) {
   gameActive = false;
-  const ov   = document.getElementById('online-overlay');
+  var ov = document.getElementById('online-overlay');
   ov.classList.remove('hidden');
-  document.getElementById('overlay-msg').textContent = msg;
-  const codeEl = document.getElementById('overlay-code');
+  document.getElementById('overlay-msg').textContent  = msg;
+  var codeEl = document.getElementById('overlay-code');
   if (code) { codeEl.style.display = 'block'; codeEl.textContent = code; }
   else       { codeEl.style.display = 'none'; }
   document.getElementById('overlay-hint').textContent = hint || '';
@@ -1187,135 +678,100 @@ function hideOnlineOverlay() {
   gameActive = true;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// GAME HISTORY
-// ═══════════════════════════════════════════════════════════════
-// Local history stored in localStorage
-let localHistory = JSON.parse(localStorage.getItem('ttt_history') || '[]');
+// ═══════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════
+var localHistory = [];
+try { localHistory = JSON.parse(localStorage.getItem('ttt_history') || '[]'); } catch(e) {}
 
 function addToHistory(p1n, p2n, winner) {
-  localHistory.unshift({
-    p1: p1n, p2: p2n, winner,
-    time: new Date().toLocaleString()
-  });
+  localHistory.unshift({ p1: p1n, p2: p2n, winner: winner, time: new Date().toLocaleString() });
   if (localHistory.length > 50) localHistory.pop();
-  localStorage.setItem('ttt_history', JSON.stringify(localHistory));
+  try { localStorage.setItem('ttt_history', JSON.stringify(localHistory)); } catch(e) {}
 }
 
-// Override saveResultToSupabase to also add local history
-const _origSave = saveResultToSupabase;
-async function saveResultToSupabase(player1, player2, winner) {
-  addToHistory(player1, player2, winner);
-  return _origSave(player1, player2, winner);
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-async function showHistory() {
+function showHistory() {
   showScreen('history');
-  const list = document.getElementById('history-list');
+  var list = document.getElementById('history-list');
+  var rows = localHistory.slice();
 
-  // Start with local history
-  let rows = [...localHistory];
+  // Also try fetching from Supabase
+  fetch(SUPA_URL + '/rest/v1/ttt_results?order=created_at.desc&limit=30', {
+    headers: sbHeaders()
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (Array.isArray(data) && data.length) {
+      rows = data.map(function(d) {
+        return { p1: d.player1, p2: d.player2, winner: d.winner,
+                 time: d.created_at ? new Date(d.created_at).toLocaleString() : '' };
+      });
+    }
+    renderHistory(list, rows);
+  }).catch(function() { renderHistory(list, rows); });
+}
 
-  // Also try fetching from Supabase if configured
-  if (SUPA_URL && SUPA_KEY) {
-    try {
-      const r = await fetch(
-        `${SUPA_URL}/rest/v1/ttt_results?order=created_at.desc&limit=30`,
-        { headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` } }
-      );
-      const data = await r.json();
-      if (Array.isArray(data) && data.length) {
-        // Merge with local (deduplicate by showing Supabase data first)
-        const remoteRows = data.map(d => ({
-          p1: d.player1, p2: d.player2, winner: d.winner,
-          time: d.created_at ? new Date(d.created_at).toLocaleString() : ''
-        }));
-        rows = remoteRows;
-      }
-    } catch(e) {}
-  }
-
+function renderHistory(list, rows) {
   if (!rows.length) {
     list.innerHTML = '<p style="color:var(--sub);text-align:center;font-size:14px;">No games played yet.</p>';
     return;
   }
-
-  list.innerHTML = rows.map(r => {
-    const wClass = r.winner === r.p1 ? 'x' : r.winner === r.p2 ? 'o' : 'd';
-    const wLabel = r.winner === 'Draw' ? 'Draw' : `${r.winner} won`;
-    return `
-      <div class="history-row">
-        <div>
-          <span style="color:var(--x);font-weight:700">${esc(r.p1)}</span>
-          <span style="color:var(--sub)"> vs </span>
-          <span style="color:var(--o);font-weight:700">${esc(r.p2)}</span>
-        </div>
-        <div style="text-align:right">
-          <div class="hw ${wClass}">${esc(wLabel)}</div>
-          <div class="htime">${r.time}</div>
-        </div>
-      </div>`;
-  }).join('');
+  var html = '';
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var wClass = (r.winner === r.p1) ? 'x' : (r.winner === r.p2) ? 'o' : 'd';
+    var wLabel = (r.winner === 'Draw') ? 'Draw' : esc(r.winner) + ' won';
+    html += '<div class="history-row">';
+    html += '<div><span style="color:var(--x);font-weight:700">' + esc(r.p1) + '</span>';
+    html += '<span style="color:var(--sub)"> vs </span>';
+    html += '<span style="color:var(--o);font-weight:700">' + esc(r.p2) + '</span></div>';
+    html += '<div style="text-align:right"><div class="hw ' + wClass + '">' + wLabel + '</div>';
+    html += '<div class="htime">' + esc(r.time) + '</div></div></div>';
+  }
+  list.innerHTML = html;
 }
 
-function esc(s) {
-  return String(s || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // CONFETTI
-// ═══════════════════════════════════════════════════════════════
-function confetti() {
-  const colors = ['#FF4757','#FFD700','#1E90FF','#2ECC71','#FF8C00','#FF69B4'];
-  for (let i = 0; i < 60; i++) {
-    const el = document.createElement('div');
-    el.className = 'confetti-piece';
-    el.style.cssText = `
-      left: ${Math.random()*100}vw;
-      background: ${colors[Math.floor(Math.random()*colors.length)]};
-      width: ${6+Math.random()*8}px;
-      height: ${6+Math.random()*8}px;
-      animation-duration: ${1.5+Math.random()*2}s;
-      animation-delay: ${Math.random()*0.5}s;
-      transform: rotate(${Math.random()*360}deg);
-    `;
-    document.body.appendChild(el);
-    el.addEventListener('animationend', () => el.remove());
+// ═══════════════════════════════════════════════
+function launchConfetti() {
+  var colors = ['#FF4757','#FFD700','#1E90FF','#2ECC71','#FF8C00','#FF69B4'];
+  for (var i = 0; i < 60; i++) {
+    (function() {
+      var el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.cssText = 'left:' + (Math.random()*100) + 'vw;' +
+        'background:' + colors[Math.floor(Math.random()*colors.length)] + ';' +
+        'width:'  + (6 + Math.random()*8) + 'px;' +
+        'height:' + (6 + Math.random()*8) + 'px;' +
+        'animation-duration:' + (1.5 + Math.random()*2) + 's;' +
+        'animation-delay:'    + (Math.random()*0.5)     + 's;' +
+        'transform:rotate('   + (Math.random()*360)     + 'deg);';
+      document.body.appendChild(el);
+      el.addEventListener('animationend', function() { el.remove(); });
+    })();
   }
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // TOAST
-// ═══════════════════════════════════════════════════════════════
-let toastTimer;
-function toast(msg) {
-  const el = document.getElementById('toast');
+// ═══════════════════════════════════════════════
+var toastTimer;
+function showToast(msg) {
+  var el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+  toastTimer = setTimeout(function() { el.classList.remove('show'); }, 3000);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════════
-
-// Build the board cells on load
-(function buildInitialBoard() {
-  const el = document.getElementById('board');
-  for (let i = 0; i < 9; i++) {
-    const div = document.createElement('div');
-    div.className = 'cell';
-    div.addEventListener('click', () => handleCellClick(i));
-    el.appendChild(div);
-  }
-})();
-
-// Keyboard: Enter to submit in name fields
-['p1name','p2name'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.addEventListener('keydown', e => { if (e.key==='Enter') startLocalGame(); });
-});
+// ═══════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════
+document.getElementById('p1name').addEventListener('keydown', function(e) { if (e.key==='Enter') startLocalGame(); });
+document.getElementById('p2name').addEventListener('keydown', function(e) { if (e.key==='Enter') startLocalGame(); });
 </script>
 </body>
 </html>
